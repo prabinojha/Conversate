@@ -1,4 +1,5 @@
 import 'package:conversate_app/screens/onboarding/details.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 import '../screens/games_page.dart';
@@ -10,9 +11,11 @@ import '../screens/onboarding/main_stuff.dart';
 import '../screens/onboarding/signin.dart';
 import '../screens/tasks_screen.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(
-    MyApp(),
+    const MyApp(),
   );
 }
 
