@@ -4,7 +4,7 @@ import 'package:conversate_app/screens/onboarding/details.dart';
 import 'package:conversate_app/screens/onboarding/freeTrial.dart';
 import 'package:conversate_app/screens/onboarding/signin.dart';
 import 'package:conversate_app/widgets/button.dart';
-import 'package:conversate_app/widgets/input_field.dart';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -97,69 +97,142 @@ class _SignUpState extends State<SignUp> {
             //   hintText: 'Password',
             //   showPasswordCover: true,
             // ),
-            Form(
-              key: _formKey,
-              child: Column(
-                children: [
-                  TextFormField(
-                    controller: nameController,
-                    onSaved: (value) {
-                      nameController.text = value!;
-                    },
-                    validator: (value) {
-                      if (value!.length == 0) {
-                        return "Please enter a username";
-                      }
-                      if (value.length > 8) {
-                        return "Username cannot be longer than 8 characters";
-                      }
-                    },
-                    decoration: InputDecoration(hintText: 'Username'),
-                  ),
-                  TextFormField(
-                    controller: emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    onSaved: (value) {
-                      emailController.text = value!;
-                    },
-                    decoration: InputDecoration(hintText: 'Email'),
-                    validator: (value) {
-                      if (value!.isEmpty) {
-                        return "Please enter your email.";
-                      }
-                      //reg expresssion for email validation
+            Container(
+              margin: EdgeInsets.all(15),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    TextFormField(
+                      controller: nameController,
+                      onSaved: (value) {
+                        nameController.text = value!;
+                      },
+                      validator: (value) {
+                        if (value!.length == 0) {
+                          return "Please enter a username";
+                        }
+                        if (value.length > 8) {
+                          return "Username cannot be longer than 8 characters";
+                        }
+                      },
+                      decoration: InputDecoration(
+                        contentPadding: EdgeInsets.all(15),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: Theme.of(context).primaryColor,
+                            width: 2.0,
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: Color.fromRGBO(2, 43, 58, 0.5),
+                            width: 2.0,
+                          ),
+                        ),
+                        hintText: 'Username',
+                        fillColor: Colors.grey,
+                        hintStyle: TextStyle(
+                          color: Color.fromRGBO(2, 43, 58, 0.4),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 15,
+                    ),
+                    TextFormField(
+                      controller: emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      onSaved: (value) {
+                        emailController.text = value!;
+                      },
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return "Please enter your email.";
+                        }
+                        //reg expresssion for email validation
 
-                      if (!RegExp("^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+[a-z]")
-                          .hasMatch(value)) {
-                        return "Please enter a valid email.";
-                      }
-                      return null;
-                    },
-                  ),
-                  TextFormField(
-                    controller: passwordController,
-                    onSaved: (value) {
-                      passwordController.text = value!;
-                    },
-                    keyboardType: TextInputType.text,
-                    obscureText: true,
-                    decoration: InputDecoration(hintText: 'password'),
-                    validator: (value) {
-                      RegExp regex = RegExp(r'^.{6,}$');
-                      if (value!.isEmpty) {
-                        return "Please enter a password.";
-                      }
-                      if (!regex.hasMatch(value)) {
-                        return "Please enter a valid password (Minium 6 characters)";
-                      }
-                    },
-                  ),
-                ],
+                        if (!RegExp("^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+[a-z]")
+                            .hasMatch(value)) {
+                          return "Please enter a valid email.";
+                        }
+                        return null;
+                      },
+                      decoration: InputDecoration(
+                        contentPadding: EdgeInsets.all(15),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: Theme.of(context).primaryColor,
+                            width: 2.0,
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: Color.fromRGBO(2, 43, 58, 0.5),
+                            width: 2.0,
+                          ),
+                        ),
+                        hintText: 'Email',
+                        fillColor: Colors.grey,
+                        hintStyle: TextStyle(
+                          color: Color.fromRGBO(2, 43, 58, 0.4),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 15,
+                    ),
+                    TextFormField(
+                      cursorColor: Colors.grey,
+                      controller: passwordController,
+                      onSaved: (value) {
+                        passwordController.text = value!;
+                      },
+                      keyboardType: TextInputType.text,
+                      obscureText: true,
+                      validator: (value) {
+                        RegExp regex = RegExp(r'^.{6,}$');
+                        if (value!.isEmpty) {
+                          return "Please enter a password.";
+                        }
+                        if (!regex.hasMatch(value)) {
+                          return "Please enter a valid password (Minium 6 characters)";
+                        }
+                      },
+                      decoration: InputDecoration(
+                        contentPadding: EdgeInsets.all(15),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: Theme.of(context).primaryColor,
+                            width: 2.0,
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: Color.fromRGBO(2, 43, 58, 0.5),
+                            width: 2.0,
+                          ),
+                        ),
+                        hintText: 'Password',
+                        fillColor: Colors.grey,
+                        hintStyle: TextStyle(
+                          color: Color.fromRGBO(2, 43, 58, 0.4),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
 
             SizedBox(
-              height: 20,
+              height: 15,
             ),
             Button(
               color: Theme.of(context).primaryColor,
