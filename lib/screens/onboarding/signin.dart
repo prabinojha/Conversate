@@ -2,15 +2,30 @@ import 'package:conversate_app/screens/onboarding/freeTrial.dart';
 import 'package:conversate_app/screens/onboarding/signup.dart';
 import 'package:conversate_app/widgets/button.dart';
 import 'package:conversate_app/widgets/input_field.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
+import '../home_screen.dart';
 import '../root_page.dart';
 
-class SignIn extends StatelessWidget {
+class SignIn extends StatefulWidget {
   static const routeName = '/sign-in';
 
   const SignIn({Key? key}) : super(key: key);
+
+  @override
+  State<SignIn> createState() => _SignInState();
+}
+
+class _SignInState extends State<SignIn> {
+  // form key
+  final _formKey = GlobalKey<FormState>();
+  // //editing controller
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final _auth = FirebaseAuth.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -48,13 +63,48 @@ class SignIn extends StatelessWidget {
               SizedBox(
                 height: 20,
               ),
-              InputField(
-                hintText: 'Email',
-                showPasswordCover: false,
-              ),
-              InputField(
-                hintText: 'Password',
-                showPasswordCover: true,
+              Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    TextFormField(
+                      controller: emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      onSaved: (value) {
+                        emailController.text = value!;
+                      },
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return "Please enter your email.";
+                        }
+                        //reg expresssion for email validation
+
+                        if (!RegExp("^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+[a-z]")
+                            .hasMatch(value)) {
+                          return "Please enter a valid email.";
+                        }
+                        return null;
+                      },
+                    ),
+                    TextFormField(
+                      controller: passwordController,
+                      onSaved: (value) {
+                        passwordController.text = value!;
+                      },
+                      keyboardType: TextInputType.text,
+                      obscureText: true,
+                      validator: (value) {
+                        RegExp regex = RegExp(r'^.{6,}$');
+                        if (value!.isEmpty) {
+                          return "Please enter a password.";
+                        }
+                        if (!regex.hasMatch(value)) {
+                          return "Please enter a valid password (Minium 6 characters)";
+                        }
+                      },
+                    )
+                  ],
+                ),
               ),
               Padding(
                 padding: const EdgeInsets.all(15),
@@ -79,10 +129,9 @@ class SignIn extends StatelessWidget {
                 color: Theme.of(context).primaryColor,
                 title: 'Sign In',
                 onPressed: () {
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(
-                      builder: (ctx) => RootPage(),
-                    ),
+                  signIn(
+                    emailController.text,
+                    passwordController.text,
                   );
                 },
               ),
@@ -100,5 +149,30 @@ class SignIn extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void signIn(String email, String password) async {
+    if (_formKey.currentState!.validate()) {
+      await _auth
+          .signInWithEmailAndPassword(
+            email: email,
+            password: password,
+          )
+          .then(
+            (uid) => {
+              Fluttertoast.showToast(msg: "Login Successful"),
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (ctx) => RootPage(),
+                ),
+              ),
+            },
+          )
+          .catchError(
+        (error) {
+          Fluttertoast.showToast(msg: error!.message);
+        },
+      );
+    }
   }
 }
