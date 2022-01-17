@@ -1,9 +1,13 @@
+import 'package:firebase_auth/firebase_auth.dart';
+
 import '../widgets/language_tile.dart';
 import 'package:flutter_svg/svg.dart';
 
 import '../widgets/notification_tile.dart';
 import '../widgets/settings_tile.dart';
 import 'package:flutter/material.dart';
+
+import 'onboarding/freeTrial.dart';
 
 class ProfileScreen extends StatelessWidget {
   static const routeName = '/profile-screen';
@@ -287,8 +291,13 @@ class ProfileScreen extends StatelessWidget {
                           ),
                           SettingsTile(
                             'Log out',
-                            () {},
-                            SvgPicture.asset('./lib/assets/icons/logout.svg'),
+                            () {
+                              logout(context);
+                            },
+                            SvgPicture.asset(
+                              './lib/assets/icons/logout.svg',
+                              color: Colors.redAccent,
+                            ),
                           ),
                         ],
                       ),
@@ -299,6 +308,15 @@ class ProfileScreen extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Future<void> logout(BuildContext context) async {
+    await FirebaseAuth.instance.signOut();
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (ctx) => FreeTrial(),
       ),
     );
   }

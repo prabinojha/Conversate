@@ -1,18 +1,53 @@
 // ignore_for_file: unnecessary_new
 
+import 'dart:developer';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:conversate_app/models/user.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   static const routeName = '/home-screen';
 
   const HomeScreen({Key? key}) : super(key: key);
 
   @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  User? user = FirebaseAuth.instance.currentUser;
+  UserModel loggedInUser = UserModel();
+  bool? noName;
+
+  @override
+  void initState() {
+    FirebaseFirestore.instance.collection('users').doc(user!.uid).get().then(
+      (value) {
+        setState(
+          () {
+            loggedInUser = UserModel.fromMap(
+              value.data(),
+            );
+            if (loggedInUser.name!.isEmpty || loggedInUser.name == null) {
+              noName = true;
+            } else {
+              noName = false;
+            }
+          },
+        );
+      },
+    );
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
+      body: SingleChildScrollView(
+        child: SafeArea(
           child: Column(
             children: [
               Column(
@@ -25,15 +60,25 @@ class HomeScreen extends StatelessWidget {
                       0,
                       5,
                     ),
-                    child: const Text(
-                      'Hi Prabesh',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 25,
-                        fontFamily: 'Poppins',
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+                    child: noName == true
+                        ? Text(
+                            'Hello there!',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 25,
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w600,
+                            ),
+                          )
+                        : Text(
+                            'Hi ${loggedInUser.name}',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 25,
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                   ),
                   Container(
                     alignment: Alignment.centerLeft,
@@ -116,8 +161,7 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
               Course(
-                asset:
-                    './lib/assets/images/an_introduction_to_social_skills.jpg',
+                asset: './lib/assets/images/an_introduction_to_social_skills.jpg',
                 colour: const LinearGradient(
                   colors: [
                     Color.fromRGBO(144, 58, 229, 1),
