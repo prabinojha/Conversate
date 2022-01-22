@@ -1,5 +1,5 @@
 import 'package:conversate_app/screens/onboarding/freeTrial.dart';
-import 'package:conversate_app/screens/onboarding/signup.dart';
+import 'package:conversate_app/screens/onboarding/resetPassword.dart';
 import 'package:conversate_app/widgets/button.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-import '../home_screen.dart';
 import '../root_page.dart';
 
 class SignIn extends StatefulWidget {
@@ -161,7 +160,13 @@ class _SignInState extends State<SignIn> {
               Padding(
                 padding: const EdgeInsets.all(15),
                 child: InkWell(
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (ctx) => ResetPasswordScreen(),
+                      ),
+                    );
+                  },
                   child: Text(
                     'Forgot Password?',
                     style: TextStyle(
