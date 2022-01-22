@@ -7,6 +7,7 @@ import '../widgets/notification_tile.dart';
 import '../widgets/settings_tile.dart';
 import 'package:flutter/material.dart';
 
+import 'edit_details.dart';
 import 'onboarding/freeTrial.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -284,6 +285,20 @@ class ProfileScreen extends StatelessWidget {
                         children: [
                           const NotificationTile(),
                           LanguageTile(),
+                          SettingsTile(
+                            'Edit Details',
+                            () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (ctx) => EditDetails(),
+                                ),
+                              );
+                            },
+                            SvgPicture.asset(
+                              './lib/assets/icons/profile.svg',
+                              color: Colors.black,
+                            ),
+                          ),
                           SettingsTile(
                             'Send feedback',
                             () {},
