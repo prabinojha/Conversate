@@ -227,12 +227,22 @@ class _EditDetailsState extends State<EditDetails> {
                 title: 'Save Details',
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
-                    if (emailController.text.isEmpty) {
-                      // email = current email (won't be changed)
+                    if (nameController.text.isEmpty) {
+                      // name = current name (won't be changed)
                     } else {
-                      print(emailController.text);
+                      // change the name of the user on the firestore database
+                    }
+                    if (emailController.text.isEmpty) {
+                      // email = current email (the email won't be changed)
+                    } else {
                       FirebaseAuth.instance.currentUser!
-                          .reauthenticateWithCredential()
+                          .reauthenticateWithCredential(
+                            EmailAuthProvider.credential(
+                              email: FirebaseAuth.instance.currentUser!.email
+                                  .toString(),
+                              password: 'dawgtheguy', // get the user's password without getting them to reauthenticate
+                            ),
+                          )
                           .then(
                             (_) => FirebaseFirestore.instance
                                 .collection('users')
@@ -249,8 +259,6 @@ class _EditDetailsState extends State<EditDetails> {
                               ),
                             ),
                           );
-                      // update the email on firebase firestore and firebase auth);
-
                     }
                     // check each field (password, name, email) individually to see if they are empty.
                     // if they are empty then that means the user wants to keep them as it is so it shouldnt be changed
