@@ -190,7 +190,7 @@ class _EditDetailsState extends State<EditDetails> {
                             return null;
                           }
                           if (value.isNotEmpty) {
-                            if (value.length < 0) {
+                            if (value.length < 6) {
                               return "Please enter a valid password (Minium 6 characters)";
                             }
                           }
@@ -227,6 +227,31 @@ class _EditDetailsState extends State<EditDetails> {
                 title: 'Save Details',
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
+                    if (emailController.text.isEmpty) {
+                      // email = current email (won't be changed)
+                    } else {
+                      print(emailController.text);
+                      FirebaseAuth.instance.currentUser!
+                          .reauthenticateWithCredential()
+                          .then(
+                            (_) => FirebaseFirestore.instance
+                                .collection('users')
+                                .doc(FirebaseAuth.instance.currentUser!.uid
+                                    .toString())
+                                .update(
+                              {
+                                'email': emailController.text,
+                              },
+                            ).then(
+                              (_) => FirebaseAuth.instance.currentUser!
+                                  .updateEmail(
+                                emailController.text,
+                              ),
+                            ),
+                          );
+                      // update the email on firebase firestore and firebase auth);
+
+                    }
                     // check each field (password, name, email) individually to see if they are empty.
                     // if they are empty then that means the user wants to keep them as it is so it shouldnt be changed
                     // if they arent empty and have passed the validation (which they should have done to get to this stage)
