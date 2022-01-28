@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:conversate_app/widgets/button.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class EditDetails extends StatefulWidget {
   const EditDetails({Key? key}) : super(key: key);
@@ -17,9 +17,47 @@ class _EditDetailsState extends State<EditDetails> {
   @override
   Widget build(BuildContext context) {
     final _formKey = GlobalKey<FormState>();
-    final TextEditingController emailController = TextEditingController();
+    final TextEditingController newEmailController = TextEditingController();
+    final TextEditingController newPasswordController = TextEditingController();
+    final TextEditingController newNameController = TextEditingController();
     final TextEditingController passwordController = TextEditingController();
-    final TextEditingController nameController = TextEditingController();
+    void saveDetails(password) {
+      if (newNameController.text.isEmpty) {
+        // name = current name (won't be changed)
+      } else {
+        // change the name of the user on the firestore database
+      }
+      if (newEmailController.text.isEmpty) {
+        // email = current email (the email won't be changed)
+      } else {
+        FirebaseAuth.instance.currentUser!
+            .reauthenticateWithCredential(
+              EmailAuthProvider.credential(
+                email: FirebaseAuth.instance.currentUser!.email.toString(),
+                password:
+                    password, // get the user's password without getting them to reauthenticate
+              ),
+            )
+            .then(
+              (_) => FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(FirebaseAuth.instance.currentUser!.uid.toString())
+                  .update(
+                {
+                  'email': newEmailController.text,
+                },
+              ).then(
+                (_) => FirebaseAuth.instance.currentUser!.updateEmail(
+                  newEmailController.text,
+                ),
+              ),
+            );
+      }
+      // check each field (password, name, email) individually to see if they are empty.
+      // if they are empty then that means the user wants to keep them as it is so it shouldnt be changed
+      // if they arent empty and have passed the validation (which they should have done to get to this stage)
+      // access firebase database and change the values
+    }
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -65,10 +103,10 @@ class _EditDetailsState extends State<EditDetails> {
                       ),
                       TextFormField(
                         cursorColor: Colors.grey,
-                        controller: nameController,
+                        controller: newNameController,
                         keyboardType: TextInputType.text,
                         onSaved: (value) {
-                          nameController.text = value!;
+                          newNameController.text = value!;
                         },
                         validator: (value) {
                           if (value!.isEmpty) {
@@ -120,10 +158,10 @@ class _EditDetailsState extends State<EditDetails> {
                       ),
                       TextFormField(
                         cursorColor: Colors.grey,
-                        controller: emailController,
+                        controller: newEmailController,
                         keyboardType: TextInputType.emailAddress,
                         onSaved: (value) {
-                          emailController.text = value!;
+                          newEmailController.text = value!;
                         },
                         validator: (value) {
                           if (value! ==
@@ -179,9 +217,9 @@ class _EditDetailsState extends State<EditDetails> {
                       ),
                       TextFormField(
                         cursorColor: Colors.grey,
-                        controller: passwordController,
+                        controller: newPasswordController,
                         onSaved: (value) {
-                          passwordController.text = value!;
+                          newPasswordController.text = value!;
                         },
                         keyboardType: TextInputType.visiblePassword,
                         obscureText: true,
@@ -227,43 +265,49 @@ class _EditDetailsState extends State<EditDetails> {
                 title: 'Save Details',
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
-                    if (nameController.text.isEmpty) {
-                      // name = current name (won't be changed)
-                    } else {
-                      // change the name of the user on the firestore database
-                    }
-                    if (emailController.text.isEmpty) {
-                      // email = current email (the email won't be changed)
-                    } else {
-                      FirebaseAuth.instance.currentUser!
-                          .reauthenticateWithCredential(
-                            EmailAuthProvider.credential(
-                              email: FirebaseAuth.instance.currentUser!.email
-                                  .toString(),
-                              password: 'dawgtheguy', // get the user's password without getting them to reauthenticate
-                            ),
-                          )
-                          .then(
-                            (_) => FirebaseFirestore.instance
-                                .collection('users')
-                                .doc(FirebaseAuth.instance.currentUser!.uid
-                                    .toString())
-                                .update(
-                              {
-                                'email': emailController.text,
-                              },
-                            ).then(
-                              (_) => FirebaseAuth.instance.currentUser!
-                                  .updateEmail(
-                                emailController.text,
+                    showDialog(
+                      context: context,
+                      builder: (context) => Dialog(
+                        alignment: Alignment.center,
+                        child: Container(
+                          height: MediaQuery.of(context).size.height / 3,
+                          width: MediaQuery.of(context).size.width / 2,
+                          child: Column(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text(
+                                  'Enter your current password to \n Save Details',
+                                  style: TextStyle(
+                                    color: Theme.of(context).primaryColor,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
                               ),
-                            ),
-                          );
-                    }
-                    // check each field (password, name, email) individually to see if they are empty.
-                    // if they are empty then that means the user wants to keep them as it is so it shouldnt be changed
-                    // if they arent empty and have passed the validation (which they should have done to get to this stage)
-                    // access firebase database and change the values
+                              TextFormField(
+                                controller: passwordController,
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  saveDetails(passwordController.text);
+                                },
+                                child: Text('Confirm'),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: Text('Cancel'),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ).catchError(
+                      (error) {
+                        Fluttertoast.showToast(msg: error!.message);
+                      },
+                    );
                   }
                 },
               ),
