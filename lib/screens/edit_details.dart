@@ -21,43 +21,6 @@ class _EditDetailsState extends State<EditDetails> {
     final TextEditingController newPasswordController = TextEditingController();
     final TextEditingController newNameController = TextEditingController();
     final TextEditingController passwordController = TextEditingController();
-    void saveDetails(password) {
-      if (newNameController.text.isEmpty) {
-        // name = current name (won't be changed)
-      } else {
-        // change the name of the user on the firestore database
-      }
-      if (newEmailController.text.isEmpty) {
-        // email = current email (the email won't be changed)
-      } else {
-        FirebaseAuth.instance.currentUser!
-            .reauthenticateWithCredential(
-              EmailAuthProvider.credential(
-                email: FirebaseAuth.instance.currentUser!.email.toString(),
-                password:
-                    password, // get the user's password without getting them to reauthenticate
-              ),
-            )
-            .then(
-              (_) => FirebaseFirestore.instance
-                  .collection('users')
-                  .doc(FirebaseAuth.instance.currentUser!.uid.toString())
-                  .update(
-                {
-                  'email': newEmailController.text,
-                },
-              ).then(
-                (_) => FirebaseAuth.instance.currentUser!.updateEmail(
-                  newEmailController.text,
-                ),
-              ),
-            );
-      }
-      // check each field (password, name, email) individually to see if they are empty.
-      // if they are empty then that means the user wants to keep them as it is so it shouldnt be changed
-      // if they arent empty and have passed the validation (which they should have done to get to this stage)
-      // access firebase database and change the values
-    }
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -267,41 +230,10 @@ class _EditDetailsState extends State<EditDetails> {
                   if (_formKey.currentState!.validate()) {
                     showDialog(
                       context: context,
-                      builder: (context) => Dialog(
-                        alignment: Alignment.center,
-                        child: Container(
-                          height: MediaQuery.of(context).size.height / 3,
-                          width: MediaQuery.of(context).size.width / 2,
-                          child: Column(
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(
-                                  'Enter your current password to \n Save Details',
-                                  style: TextStyle(
-                                    color: Theme.of(context).primaryColor,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                              TextFormField(
-                                controller: passwordController,
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  saveDetails(passwordController.text);
-                                },
-                                child: Text('Confirm'),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                                child: Text('Cancel'),
-                              ),
-                            ],
-                          ),
-                        ),
+                      builder: (context) => PasswordDialogue(
+                        newEmailController,
+                        passwordController,
+                        newNameController,
                       ),
                     ).catchError(
                       (error) {
@@ -320,6 +252,156 @@ class _EditDetailsState extends State<EditDetails> {
               )
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class PasswordDialogue extends StatelessWidget {
+  final TextEditingController newEmailController;
+  final TextEditingController passwordController;
+  final TextEditingController newNameController;
+
+  PasswordDialogue(
+    this.newEmailController,
+    this.passwordController,
+    this.newNameController,
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    void saveDetails(password) {
+      if (newNameController.text.isEmpty) {
+        // name = current name (won't be changed)
+
+      } else {
+        // change the name of the user on the firestore database
+        FirebaseFirestore.instance
+            .collection('users')
+            .doc(FirebaseAuth.instance.currentUser!.uid.toString())
+            .update(
+          {
+            'name': newNameController.text,
+          },
+        );
+      }
+      if (newEmailController.text.isEmpty) {
+        // email = current email (the email won't be changed)
+
+      } else {
+        FirebaseAuth.instance.currentUser!
+            .reauthenticateWithCredential(
+              EmailAuthProvider.credential(
+                email: FirebaseAuth.instance.currentUser!.email.toString(),
+                password: password,
+              ),
+            )
+            .then(
+              (_) => FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(FirebaseAuth.instance.currentUser!.uid.toString())
+                  .update(
+                {
+                  'email': newEmailController.text,
+                },
+              ),
+            )
+            .then(
+              (_) => FirebaseAuth.instance.currentUser!.updateEmail(
+                newEmailController.text,
+              ),
+            )
+            .catchError(
+          (error) {
+            Fluttertoast.showToast(msg: error);
+          },
+        );
+      }
+      if (passwordController.text.isEmpty) {
+        // password = current password (the email won't be changed)
+      } else {
+        // change the password
+      }
+      // check each field (password, name, email) individually to see if they are empty.
+      // if they are empty then that means the user wants to keep them as it is so it shouldnt be changed
+      // if they arent empty and have passed the validation (which they should have done to get to this stage)
+      // access firebase database and change the values
+    }
+
+    return Dialog(
+      alignment: Alignment.center,
+      child: Container(
+        height: MediaQuery.of(context).size.height / 3,
+        width: MediaQuery.of(context).size.width / 2,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(15),
+              child: Text(
+                'Enter your current password to \n Save Details',
+                style: TextStyle(
+                  color: Theme.of(context).primaryColor,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TextFormField(
+                validator: (value) {
+                  // add validation
+                },
+                cursorColor: Colors.grey,
+                controller: passwordController,
+                onSaved: (value) {
+                  passwordController.text = value!;
+                },
+                keyboardType: TextInputType.text,
+                obscureText: true,
+                decoration: InputDecoration(
+                  contentPadding: EdgeInsets.all(15),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).primaryColor,
+                      width: 2.0,
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: Color.fromRGBO(2, 43, 58, 0.5),
+                      width: 2.0,
+                    ),
+                  ),
+                  hintText: 'Password',
+                  fillColor: Colors.grey,
+                  hintStyle: TextStyle(
+                    color: Color.fromRGBO(2, 43, 58, 0.4),
+                  ),
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                saveDetails(passwordController.text);
+              },
+              style: TextButton.styleFrom(
+                primary: Theme.of(context).accentColor,
+              ),
+              child: Text('Confirm'),
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                primary: Theme.of(context).accentColor,
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+          ],
         ),
       ),
     );
