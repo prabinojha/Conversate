@@ -20,7 +20,6 @@ class _EditDetailsState extends State<EditDetails> {
     final TextEditingController newEmailController = TextEditingController();
     final TextEditingController newPasswordController = TextEditingController();
     final TextEditingController newNameController = TextEditingController();
-    final TextEditingController passwordController = TextEditingController();
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -97,7 +96,8 @@ class _EditDetailsState extends State<EditDetails> {
                               width: 2.0,
                             ),
                           ),
-                          hintText: '', // show the users current name
+                          hintText:
+                              'Enter a new Username', // show the users current name
                           fillColor: Colors.grey,
 
                           hintStyle: TextStyle(
@@ -124,7 +124,9 @@ class _EditDetailsState extends State<EditDetails> {
                         controller: newEmailController,
                         keyboardType: TextInputType.emailAddress,
                         onSaved: (value) {
-                          newEmailController.text = value!;
+                          setState(() {
+                            newEmailController.text = value!;
+                          });
                         },
                         validator: (value) {
                           if (value! ==
@@ -227,12 +229,26 @@ class _EditDetailsState extends State<EditDetails> {
                 color: Theme.of(context).primaryColor,
                 title: 'Save Details',
                 onPressed: () async {
-                  if (_formKey.currentState!.validate()) {
+                  if (newNameController.text.isEmpty &&
+                      newEmailController.text.isEmpty &&
+                      newPasswordController.text.isEmpty) {
+                    showDialog(
+                      context: context,
+                      builder: (ctx) => Dialog(
+                        child: Container(
+                          margin: EdgeInsets.all(15),
+                          child: Text(
+                            'Cannot Save Details when there is nothing to change',
+                          ),
+                        ),
+                      ),
+                    );
+                  } else if (_formKey.currentState!.validate()) {
                     showDialog(
                       context: context,
                       builder: (context) => PasswordDialogue(
                         newEmailController,
-                        passwordController,
+                        newPasswordController,
                         newNameController,
                       ),
                     ).catchError(
@@ -258,23 +274,29 @@ class _EditDetailsState extends State<EditDetails> {
   }
 }
 
-class PasswordDialogue extends StatelessWidget {
+class PasswordDialogue extends StatefulWidget {
   final TextEditingController newEmailController;
-  final TextEditingController passwordController;
+  final TextEditingController newPasswordController;
   final TextEditingController newNameController;
 
   PasswordDialogue(
     this.newEmailController,
-    this.passwordController,
+    this.newPasswordController,
     this.newNameController,
   );
 
   @override
-  Widget build(BuildContext context) {
-    void saveDetails(password) {
-      if (newNameController.text.isEmpty) {
-        // name = current name (won't be changed)
+  State<PasswordDialogue> createState() => _PasswordDialogueState();
+}
 
+class _PasswordDialogueState extends State<PasswordDialogue> {
+  final TextEditingController passwordController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    Future<void> saveDetails(password) async {
+      if (widget.newNameController.text.isEmpty) {
+        // name = current name (won't be changed)
       } else {
         // change the name of the user on the firestore database
         FirebaseFirestore.instance
@@ -282,11 +304,11 @@ class PasswordDialogue extends StatelessWidget {
             .doc(FirebaseAuth.instance.currentUser!.uid.toString())
             .update(
           {
-            'name': newNameController.text,
+            'name': widget.newNameController.text,
           },
         );
       }
-      if (newEmailController.text.isEmpty) {
+      if (widget.newEmailController.text.isEmpty) {
         // email = current email (the email won't be changed)
 
       } else {
@@ -303,13 +325,13 @@ class PasswordDialogue extends StatelessWidget {
                   .doc(FirebaseAuth.instance.currentUser!.uid.toString())
                   .update(
                 {
-                  'email': newEmailController.text,
+                  'email': widget.newEmailController.text,
                 },
               ),
             )
             .then(
               (_) => FirebaseAuth.instance.currentUser!.updateEmail(
-                newEmailController.text,
+                widget.newEmailController.text,
               ),
             )
             .catchError(
@@ -318,10 +340,12 @@ class PasswordDialogue extends StatelessWidget {
           },
         );
       }
-      if (passwordController.text.isEmpty) {
+      if (widget.newPasswordController.text.isEmpty) {
         // password = current password (the email won't be changed)
       } else {
         // change the password
+        FirebaseAuth.instance.currentUser!
+            .updatePassword(widget.newPasswordController.text);
       }
       // check each field (password, name, email) individually to see if they are empty.
       // if they are empty then that means the user wants to keep them as it is so it shouldnt be changed
@@ -384,8 +408,27 @@ class PasswordDialogue extends StatelessWidget {
               ),
             ),
             TextButton(
-              onPressed: () {
-                saveDetails(passwordController.text);
+              onPressed: () async {
+                await saveDetails(passwordController.text)
+                    .then(
+                  (value) => Navigator.of(context).pop(),
+                )
+                    .then((value) {
+                  setState(
+                    () {},
+                  );
+                  showDialog(
+                    context: context,
+                    builder: (ctx) => Dialog(
+                      child: Container(
+                        margin: EdgeInsets.all(15),
+                        child: Text('Your details were updated'),
+                      ),
+                    ),
+                  );
+                }).catchError((error) {
+                  Fluttertoast.showToast(msg: error);
+                });
               },
               style: TextButton.styleFrom(
                 primary: Theme.of(context).accentColor,
@@ -407,3 +450,5 @@ class PasswordDialogue extends StatelessWidget {
     );
   }
 }
+
+// TODO: FIX save details so that user doesn't have to enter password if they are only changing username. Make sure there aren't any weird errors.

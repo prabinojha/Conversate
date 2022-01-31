@@ -78,8 +78,22 @@ class ResetPasswordScreen extends StatelessWidget {
                 onPressed: () async {
                   await auth
                       .sendPasswordResetEmail(
-                    email: emailController.text,
-                  )
+                        email: emailController.text,
+                      )
+                      .then(
+                        (value) => showDialog(
+                          context: context,
+                          builder: (ctx) => Dialog(
+
+                            child: Container(
+                              margin: EdgeInsets.all(15),
+                              child: Text(
+                                'Check your email: ${emailController.text}',
+                              ),
+                            ),
+                          ),
+                        ),
+                      )
                       .catchError(
                     (error) {
                       String errorMessage = error.message;
