@@ -10,6 +10,7 @@ import '../screens/profile_screen.dart';
 import '../screens/onboarding/main_stuff.dart';
 import '../screens/onboarding/signin.dart';
 import '../screens/tasks_screen.dart';
+import 'screens/course/course_info.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -47,6 +48,7 @@ class MyApp extends StatelessWidget {
         SignIn.routeName: (ctx) => SignIn(),
         SignUp.routeName: (ctx) => SignUp(),
         FreeTrial.routeName: (ctx) => FreeTrial(),
+        CourseInfo.routeName: (ctx) => CourseInfo(),
         DetailsOnboardingScreen.routeName: (ctx) => DetailsOnboardingScreen(),
       },
     );

@@ -8,6 +8,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import 'course/course_info.dart';
+
 class HomeScreen extends StatefulWidget {
   static const routeName = '/home-screen';
 
@@ -161,7 +163,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               Course(
-                asset: './lib/assets/images/an_introduction_to_social_skills.jpg',
+                asset:
+                    './lib/assets/images/an_introduction_to_social_skills.jpg',
                 colour: const LinearGradient(
                   colors: [
                     Color.fromRGBO(144, 58, 229, 1),
@@ -329,59 +332,61 @@ class Course extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {},
-      child: GestureDetector(
-        onTap: () {},
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            gradient: colour,
-            image: DecorationImage(
-              opacity: 0.2,
-              fit: BoxFit.cover,
-              image: AssetImage(
-                asset,
-              ),
+      onTap: () {
+        Navigator.of(context).pushNamed(
+          CourseInfo.routeName,
+        );
+        print('pressed');
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          gradient: colour,
+          image: DecorationImage(
+            opacity: 0.2,
+            fit: BoxFit.cover,
+            image: AssetImage(
+              asset,
             ),
           ),
-          height: MediaQuery.of(context).size.height / 3,
-          width: MediaQuery.of(context).size.width / 1.1,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    margin: const EdgeInsets.all(15),
-                    child: Text(
-                      title,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                      ),
+        ),
+        height: MediaQuery.of(context).size.height / 3,
+        width: MediaQuery.of(context).size.width / 1.1,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  margin: const EdgeInsets.all(15),
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: SvgPicture.asset('./lib/assets/icons/Union.svg'),
-                  ),
-                ],
-              ),
-              Container(
-                alignment: Alignment.bottomLeft,
-                margin: const EdgeInsets.all(15),
-                child: const Text(
-                  'CHAPTER 7/10',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 15,
-                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: SvgPicture.asset('./lib/assets/icons/Union.svg'),
+                ),
+              ],
+            ),
+            Container(
+              alignment: Alignment.bottomLeft,
+              margin: const EdgeInsets.all(15),
+              child: const Text(
+                'CHAPTER 7/10',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 15,
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
