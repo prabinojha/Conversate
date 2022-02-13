@@ -1,0 +1,4 @@
+-   Make so that in course content and about, you can switch between different tabs to see different information.
+
+-   FIX save details so that user doesn't have to enter password if they are only changing username. 
+    Make sure there aren't any weird errors. (edit_details.dart)
